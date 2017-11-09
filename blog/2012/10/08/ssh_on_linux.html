@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang='zh'>
+        <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="//cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>ssh on linux</title>
+</head>
+
+<body>
+        <div id="header">
+    <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                        <div class="navbar-header">
+                                <a class="navbar-brand" href="/">CLOUD</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="example-navbar-collapse">
+                                <ul class="nav navbar-nav">
+                                        <li><a href="/tweet"><i class="icon-retweet icon-white"></i>Tweets</a></li>
+                                        <li><a href="/archive.html"><i class="icon-book icon-white"></i>Archives</a></li>
+                                        <li><a href="/category.html"><i class="icon-th-list icon-white"></i>category</a></li>
+                                        <li><a href="/about.html"><i class="icon-user icon-white"></i>About</a></li>
+                                        <li class="dropdown">
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                                        Friend Links <b class="caret"></b>
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                        <li><a href="http://www.ruanyifeng.com/home.html" target="_blank">阮一峰</a></li>
+                                                        <li><a href="http://coolshell.cn/" target="_blank">陈皓haoel</a></li>
+                                                        <li><a href="http://www.dbanotes.net/" target="_blank">冯大辉Fenng</a></li>
+                                                        <li><a href="http://robbin.iteye.com/" target="_blank">范凯robbin</a></li>
+                                                        <li><a href="http://www.eygle.com/" target="_blank">盖国强eygle</a></li>
+                                                        <li><a href="http://blog.csdn.net/tianlesoftware" target="_blank">David Dai</a></li>
+                                                        <li><a href="http://www.joelonsoftware.com/" target="_blank">Joel Spolsky</a></li>
+                                                        <li><a href="http://mindhacks.cn/" target="_blank">刘未鹏MindHacks</a></li>
+                                                        <li><a href="http://www.my1510.cn/author.php?roseluqiu" target="_blank">闾丘露薇</a></li>
+                                                        <li><a href="http://www.dapenti.com/blog/" target="_blank">铂程斋dapenti</a></li>
+                                                </ul>
+                                        </li>
+                                </ul>
+                        </div>
+                </div>
+        </nav>
+</div>
+
+
+        <div id="content">
+                <div class="container">
+                        <div class="row">
+                                <div>
+                                        <div class="entry">
+        <div class="entry entry-detail">
+                    <div class="entry-header">
+                            <h1 class="entry-title">ssh on linux</h1>
+                            <div class="entry-meta">
+                                    <span class="entry-by">
+                                            <i class="icon-user"></i> <a href="/">dylan</a> on 2012-10-08 14:35:57
+                                    </span>
+                            </div>
+                    </div>
+                <div class="entry-content">
+                        <h2>写在前面的话</h2>
+<p>SSH (Secure Shell)可以说是每一台Unix/Linux主机的必备软件和服务，既可以用于远程主机登录，也可以直接在远程主机上执行操作。</p>
+<p>对于系统管理员来说，SSH就更显重要了。因为这意味着，当要进行服务器维护工作时，你可以通过SSH在办公区直接管理服务器，而不必跑到机房，或者偏远的IDC。正如本站一样，建站时即使用Xshell客户端远程登录到刚购买的Linode VPS，进行博客环境的搭建以及主机基础安全防护工作；而无需翻山越岭跨不远万里地跑到Linode的某个数据中心。</p>
+<p>SSH确实为我们开启了一扇方便之门，但使用不慎也会带来一些安全隐患。当你的主机暴露在互联网上而不加任何防护，那么它很有可能就是某个好事者的下一道小菜。在开启SSH服务时，我们可以适当更改某些设置，提高SSH服务的安全性，降低被攻击的可能性。</p>
+<h3>1. 使用公钥私钥</h3>
+<p>使用公钥私钥对进行连接，而不需要输入口令，这样可以减少暴力破解的可能性。前提是需要将私钥保护好。</p>
+<h4>客户端</h4>
+<p>使用<code>ssh-keygen</code>命令，产生密钥对，并将公钥上传至服务端。</p>
+<p>也可以使用shell客户端自带的Key管理工具来生成，本站即使用Xshell生成2048位的RSA密钥对，并将公钥id_rsa.pub上传到服务端。</p>
+<h4>服务端</h4>
+<p>在用户anybody下创建<code>.ssh</code>文件夹，并拷贝<code>id_rsa.pub</code>到<code>~/.ssh/authorized_keys</code></p>
+<pre><code>cd  /home/anybody
+mkdir .ssh
+cat id_rsa.pub &gt;&gt; .ssh/authorized_keys
+
+chown -R anybody:anybody .ssh
+
+chmod 700 .ssh
+chmod 600 .ssh/authorized_keys
+</code></pre>
+<p>注：<code>~/.ssh/authorized_keys</code>是ssh的默认配置，详情见<code>/etc/ssh/sshd_config</code></p>
+<h3>2. 修改默认端口</h3>
+<p>编号为1024以下的端口都是一些周知端口，SSH默认的端口号为22，更改SSH端口为非常规端口，可以在一定程度上减少端口扫描的信息量，如改为5555，攻击者不一定能够很快猜测到这个端口就是SSH服务，具有一定的不确定性。</p>
+<p>更改配置 <code>/etc/ssh/sshd_config</code>：</p>
+<pre><code>Port 5555
+</code></pre>
+<h3>3. 禁止root直接登录</h3>
+<p>root用户权限太大，直接使用root登录进行操作，稍有不慎就可能会引发意想不到的问题，详见<a href="http://www.dylanninin.com/blog/2012/10/root-info-and-basic-security.html">root用户介绍和基础安全防护</a>。在SSH中禁用root登录：</p>
+<pre><code>PermitRootLogin no
+</code></pre>
+<h3>4. 取消密码认证</h3>
+<p>前面已经通过ssh-key或SSH客户端工具生成了密钥对，就已经可以使用密钥进行登录认证了；如果还留有密码认证，这显然会是好事者喜欢的盲点。在SSH中取消密码认证：</p>
+<pre><code>PasswordAuthentication no
+</code></pre>
+<h3>5. 登录提醒</h3>
+<p>在用户成功登录后，sshd会进行一些的动作，其中可能会执行~/.ssh/rc和/etc/ssh/sshrc脚本。利用这个特性，可以制定sshrc脚本，当有用户SSH远程登录时，发送邮件提醒，利于尽早发现异常。</p>
+<pre><code>echo "http://whatismyipaddress.com/ip/${SSH_CLIENT%% *}" | mail -s "$USER login from ${SSH_CLIENT%% *}" dylanninin@139.com
+</code></pre>
+<p>以上是本站使用SSH的一些基础安全防护策略。SSH的设计和功能很好很强大，Xshell也是一款十分值得推荐的客户端，更多信息，可以参考延伸阅读。</p>
+<h2>延伸阅读</h2>
+<ul>
+<li><a href="http://www.ibm.com/developerworks/cn/aix/library/au-sshsecurity/index.html">SSH安全性和配置入门</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html">SSH原理与运用(一)</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2011/12/ssh_port_forwarding.html">SSH原理与运用(二)</a></li>
+<li><a href="http://www.cnblogs.com/shuaixf/archive/2012/05/25/2517947.html">与你潇洒人生路：SSH配置</a></li>
+<li><a href="http://actgod.com/archives/86/">A挨个搞： Xshell十大技巧</a></li>
+</ul> 
+                </div>
+        </div>
+</div>
+
+                                </div>
+                        </div>
+                </div>
+        </div>
+        <div id="footer">
+
+        <div class="modal-footer">
+                <p class="text-center">
+                        Blog of <a href="/">dylan</a>.
+                        Follow me on <a href="https://twitter.com/dylanninin" target="_blank">twitter</a>
+                        or <a href="http://weibo.com/dylanninin" target="_blank">weibo</a>
+                </p>
+                <p class="text-center">
+                        UI Designed by <a href="http://twitter.github.com/bootstrap" target="_blank">Twitter
+                                Bootstrap</a>.
+                        Powered by <a href="http://webpy.org" target="_blank">Web.py</a>.
+                        Hosted by <a href="http://www.linode.com" target="_blank">Linode</a>.
+                        Licensed under <a
+                                href="http://creativecommons.org/licenses/by-nc-nd/3.0/" target="_blank">CC BY
+                                3.0</a>
+                </p>
+                <p class="text-center">
+                        Copyright &copy <a href="/">CLOUD</a> |
+                        <a href="/about.html">About</a>
+                </p>
+
+        </div>
+        <script src="/static/js/jquery.js"></script>
+        <script src="/static/js/jquery-3.1.1.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang='zh'>
+        <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="//cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>oracle database concepts</title>
+</head>
+
+<body>
+        <div id="header">
+    <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                        <div class="navbar-header">
+                                <a class="navbar-brand" href="/">CLOUD</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="example-navbar-collapse">
+                                <ul class="nav navbar-nav">
+                                        <li><a href="/tweet"><i class="icon-retweet icon-white"></i>Tweets</a></li>
+                                        <li><a href="/archive.html"><i class="icon-book icon-white"></i>Archives</a></li>
+                                        <li><a href="/category.html"><i class="icon-th-list icon-white"></i>category</a></li>
+                                        <li><a href="/about.html"><i class="icon-user icon-white"></i>About</a></li>
+                                        <li class="dropdown">
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                                        Friend Links <b class="caret"></b>
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                        <li><a href="http://www.ruanyifeng.com/home.html" target="_blank">阮一峰</a></li>
+                                                        <li><a href="http://coolshell.cn/" target="_blank">陈皓haoel</a></li>
+                                                        <li><a href="http://www.dbanotes.net/" target="_blank">冯大辉Fenng</a></li>
+                                                        <li><a href="http://robbin.iteye.com/" target="_blank">范凯robbin</a></li>
+                                                        <li><a href="http://www.eygle.com/" target="_blank">盖国强eygle</a></li>
+                                                        <li><a href="http://blog.csdn.net/tianlesoftware" target="_blank">David Dai</a></li>
+                                                        <li><a href="http://www.joelonsoftware.com/" target="_blank">Joel Spolsky</a></li>
+                                                        <li><a href="http://mindhacks.cn/" target="_blank">刘未鹏MindHacks</a></li>
+                                                        <li><a href="http://www.my1510.cn/author.php?roseluqiu" target="_blank">闾丘露薇</a></li>
+                                                        <li><a href="http://www.dapenti.com/blog/" target="_blank">铂程斋dapenti</a></li>
+                                                </ul>
+                                        </li>
+                                </ul>
+                        </div>
+                </div>
+        </nav>
+</div>
+
+
+        <div id="content">
+                <div class="container">
+                        <div class="row">
+                                <div>
+                                        <div class="entry">
+        <div class="entry entry-detail">
+                    <div class="entry-header">
+                            <h1 class="entry-title">oracle database concepts</h1>
+                            <div class="entry-meta">
+                                    <span class="entry-by">
+                                            <i class="icon-user"></i> <a href="/">dylan</a> on 2012-10-01 14:35:57
+                                    </span>
+                            </div>
+                    </div>
+                <div class="entry-content">
+                        <hr />
+<p>layout: post
+title: Oracle Database Concepts
+category : Oracle
+tags : [Oracle, Database, DBA]</p>
+<hr />
+<p>Oracle Database概念非常多，其中关于SID、NAMES以及监听参数的定义和关系经常让人混
+淆。在<a href="http://blog.csdn.net/tianlesoftware">tianlesoftware</a>的博客上，有一篇专门 讲解了这些概念，行文思路清晰，概念和实践分析相结合，易于理解；且文中大量引用官 方文档，来源可靠，可信度高。作者的博客很值得同行学习和借鉴。 </p>
+<p>由于刚入行不久，秉承实用原则这里仅作粗略了解和记录，详情可以参见博客原文。</p>
+<h2>基本概念</h2>
+<h3>db相关</h3>
+<ul>
+<li>dbid, sid</li>
+</ul>
+<h3>pfile参数</h3>
+<ul>
+<li>
+<p><code>db_name</code>, <code>db_domain</code>, <code>instance_name</code></p>
+</li>
+<li>
+<p><code>db_unique_name</code>, <code>service_names</code></p>
+</li>
+<li>
+<p><code>global_name</code>, <code>global_names</code></p>
+</li>
+</ul>
+<h3>listener.ora参数</h3>
+<ul>
+<li><code>sid_name</code>, <code>global_dbname</code></li>
+</ul>
+<h3>tnsnames.ora参数</h3>
+<ul>
+<li><code>service_name</code>, <code>sid</code></li>
+</ul>
+<h3>1. DB相关</h3>
+<h4>dbid</h4>
+<ul>
+<li>
+<p><code>db_name</code>在数据库内部的表示，创建数据库时用<code>db_name</code>结合一种算法生成。</p>
+</li>
+<li>
+<p><code>dbid</code>存在于数据文件、控制文件中，表示数据文件的归属，<code>dbid</code>唯一。不同数据库 <code>dbid</code>不同，但<code>db_name</code>有可能相同</p>
+</li>
+</ul>
+<h4>dbid 和 sid</h4>
+<p>查看dbid：</p>
+<pre><code>select * from v$database;
+</code></pre>
+<h4>在controlfile中查看dbid和sid</h4>
+<p>转存控制文件到trace file：</p>
+<pre><code>alter session set events 'immediate trace name CONTROLF level 8';
+
+select gettracefile() from dual;
+
+Db ID=1873459096=0x6faab798, Db Name='EGOLIFE'
+</code></pre>
+<h4>修改<code>dbid</code>和<code>dbname</code></h4>
+<p>主要步骤：</p>
+<ul>
+<li>a. <code>startup mount</code>;</li>
+<li>b. <code>nid TARGET=SYS/oracle@egolife DBNAME=one</code></li>
+<li>c. <code>startup mount</code>;</li>
+<li>d. <code>alter database open resetlogs</code>;</li>
+</ul>
+<p>更改<code>dbname</code>自后，之前的备份均无效。</p>
+<h4>查看<code>sid</code>(system identifier)</h4>
+<pre><code>ORACLE_SID sid
+ORACLE_HOME oracle home
+</code></pre>
+<p>oracle用<code>sid</code>和<code>oracle_home</code>生成一个key，来创建共享内存。</p>
+<h3>2. pfile参数</h3>
+<pre><code>SQL&gt; show parameter name
+NAME TYPE VALUE
+-------------------------- ----------- --------------------
+db_file_name_convert       string
+db_name                    string       MANUAL
+db_unique_name             string       MANUAL
+global_names               boolean      FALSE
+instance_name              string       MANUAL
+lock_name_space            string
+log_file_name_convert      string
+service_names              string       MANUAL.egolife.com
+</code></pre>
+<h4>db_name</h4>
+<ul>
+<li>不能超过8个字符</li>
+<li>动态注册监听</li>
+</ul>
+<h3>instance_name</h3>
+<ul>
+<li>在RAC环境中<code>DB_NAME</code>相同，但<code>INSTANCE_NAME</code>不同，用以区分唯一的实例</li>
+<li>默认值为<code>SID</code>，一般与数据库名相同，也可以不同</li>
+<li>与进程名相关 ,并且<code>initSID.ora/orapwSID</code>与<code>instance_name</code>保持一致</li>
+</ul>
+<h4>db_domain</h4>
+<ul>
+<li>区分网络层次结构</li>
+</ul>
+<h4>db_unique_name</h4>
+<ul>
+<li>在DataGuard环境中，DB_NAME相同，但<code>DB_UNIQUE_NAME</code>不同</li>
+</ul>
+<h4>service_names</h4>
+<ul>
+<li>值：<code>db_unique_name.db_domain</code></li>
+</ul>
+<h4>global_name</h4>
+<ul>
+<li>由<code>db_name.db_domain</code>组成</li>
+</ul>
+<h4>global_names</h4>
+<ul>
+<li>创建db link时是否强制使用远程数据库的<code>global_name</code>，多用于分布式系统</li>
+</ul>
+<h3>3. listener.ora参数</h3>
+<h4>sid_name</h4>
+<ul>
+<li>数据库的运行的实例名，与<code>instance_name</code>一致</li>
+</ul>
+<h4>global_dbname</h4>
+<ul>
+<li>配置静态监听需要使用</li>
+<li><code>global_dbname</code>是listener对外的连接名称，我们可以写成任意值，客户端配置时， <code>service_name</code>需要与<code>global_dbname</code>一致</li>
+<li>如果是动态监听，因<code>service_names</code>由多个，则会注册多个，每个对应着同一个 <code>instance_name</code>，这样配置任意一个即可访问</li>
+</ul>
+<h3>4. tnsnames.ora参数</h3>
+<h4>service_name</h4>
+<ul>
+<li>静态监听：<code>service_name</code> = <code>global_dbname</code></li>
+<li>动态监听：<code>service_name</code> = <code>service_names</code>(在initSID.ora文件中)</li>
+</ul>
+<h4>sid</h4>
+<ul>
+<li>直接指定<code>instance_name</code></li>
+</ul>
+<h2>参考</h2>
+<ul>
+<li><a href="http://blog.csdn.net/tianlesoftware">SID、NAMES及监听参数说明</a></li>
+<li><a href="http://blog.csdn.net/tianlesoftware/article/details/5622268">Oracle小知识总结(一)</a></li>
+</ul> 
+                </div>
+        </div>
+</div>
+
+                                </div>
+                        </div>
+                </div>
+        </div>
+        <div id="footer">
+
+        <div class="modal-footer">
+                <p class="text-center">
+                        Blog of <a href="/">dylan</a>.
+                        Follow me on <a href="https://twitter.com/dylanninin" target="_blank">twitter</a>
+                        or <a href="http://weibo.com/dylanninin" target="_blank">weibo</a>
+                </p>
+                <p class="text-center">
+                        UI Designed by <a href="http://twitter.github.com/bootstrap" target="_blank">Twitter
+                                Bootstrap</a>.
+                        Powered by <a href="http://webpy.org" target="_blank">Web.py</a>.
+                        Hosted by <a href="http://www.linode.com" target="_blank">Linode</a>.
+                        Licensed under <a
+                                href="http://creativecommons.org/licenses/by-nc-nd/3.0/" target="_blank">CC BY
+                                3.0</a>
+                </p>
+                <p class="text-center">
+                        Copyright &copy <a href="/">CLOUD</a> |
+                        <a href="/about.html">About</a>
+                </p>
+
+        </div>
+        <script src="/static/js/jquery.js"></script>
+        <script src="/static/js/jquery-3.1.1.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+</div>
+
+</body>
+</html>

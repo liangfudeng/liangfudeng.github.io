@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang='zh'>
+        <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="//cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>summary of my blog</title>
+</head>
+
+<body>
+        <div id="header">
+    <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                        <div class="navbar-header">
+                                <a class="navbar-brand" href="/">CLOUD</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="example-navbar-collapse">
+                                <ul class="nav navbar-nav">
+                                        <li><a href="/tweet"><i class="icon-retweet icon-white"></i>Tweets</a></li>
+                                        <li><a href="/archive.html"><i class="icon-book icon-white"></i>Archives</a></li>
+                                        <li><a href="/category.html"><i class="icon-th-list icon-white"></i>category</a></li>
+                                        <li><a href="/about.html"><i class="icon-user icon-white"></i>About</a></li>
+                                        <li class="dropdown">
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                                        Friend Links <b class="caret"></b>
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                        <li><a href="http://www.ruanyifeng.com/home.html" target="_blank">阮一峰</a></li>
+                                                        <li><a href="http://coolshell.cn/" target="_blank">陈皓haoel</a></li>
+                                                        <li><a href="http://www.dbanotes.net/" target="_blank">冯大辉Fenng</a></li>
+                                                        <li><a href="http://robbin.iteye.com/" target="_blank">范凯robbin</a></li>
+                                                        <li><a href="http://www.eygle.com/" target="_blank">盖国强eygle</a></li>
+                                                        <li><a href="http://blog.csdn.net/tianlesoftware" target="_blank">David Dai</a></li>
+                                                        <li><a href="http://www.joelonsoftware.com/" target="_blank">Joel Spolsky</a></li>
+                                                        <li><a href="http://mindhacks.cn/" target="_blank">刘未鹏MindHacks</a></li>
+                                                        <li><a href="http://www.my1510.cn/author.php?roseluqiu" target="_blank">闾丘露薇</a></li>
+                                                        <li><a href="http://www.dapenti.com/blog/" target="_blank">铂程斋dapenti</a></li>
+                                                </ul>
+                                        </li>
+                                </ul>
+                        </div>
+                </div>
+        </nav>
+</div>
+
+
+        <div id="content">
+                <div class="container">
+                        <div class="row">
+                                <div>
+                                        <div class="entry">
+        <div class="entry entry-detail">
+                    <div class="entry-header">
+                            <h1 class="entry-title">summary of my blog</h1>
+                            <div class="entry-meta">
+                                    <span class="entry-by">
+                                            <i class="icon-user"></i> <a href="/">dylan</a> on 2012-10-02 14:35:57
+                                    </span>
+                            </div>
+                    </div>
+                <div class="entry-content">
+                        <h2>写在前面的话</h2>
+<p>继9月30号作好<a href="/blog/2012/09/30/blog_schedule.html">本站创建和维护计划</a>后，经过这两天的折腾，总算完成了一个博客系统的雏形，而且是一个十分朴素的雏形。</p>
+<p>在这两天，主要熟悉了MTOS的博客管理，自定义了几个模版或小工具，添加了几个插件，定义了页首、页尾的的Contact和About信息，添加了HTTP请求常见的几个错误跳转页面，最后确定了博客当前的布局和功能，也就是现在看到的这个样子。若没有异常情况，本站很长一段时间内将保持当前布局和功能；这段时间以后，我会将更多的精力放在如何提高博客质量上。</p>
+<p>现在稍稍总结下这两天的工作，也记下生活流水，以作备忘。</p>
+<h2>博客管理</h2>
+<p>MTOS的博客管理功能确实是十分强大，博客、模版、小工具等均有版本记录，在编辑的过程中，若异常关闭浏览器，再次打开时还可以进行恢复。在折腾过程中，不知道是我心太急，还是带宽有限，每一次编辑、发布就感觉系统的响应越来越慢，本以为十一假期大家都会在高速公路上拥堵不堪，没想到互联网也是如此。无奈之下，Chrome都Oops不响应了，只好关闭重启，好在MTOS有自动恢复功能，这样我就减少了许多体力劳动，不然还真会像某位急躁哥从车窗探出身子非常淡定地凝望这十分拥堵的traffic line，而且一凝望就是两小时。</p>
+<h2>模版和小工具</h2>
+<h3>1. 相关文章</h3>
+<p>在博客系统中，相关文章是一个十分重要的功能，这些文章或在分类上相同，或在标签上相同，使分散的文章在一定层次上进行了聚合，更具有知识性和传播性。当用户阅读完一篇博客时，若饶有兴致，就可以根据列出的相关文章进行衍生阅读，很方便。</p>
+<p>在网上搜索时，找到一篇关于不使用插件列出具有相同标签文章的博客，只需添加几行代码到文章模版中即可。</p>
+<p>本站采用的方式是新建一个模版<code>tag_related_entries</code>，代码如下：</p>
+<pre><code>&lt;mt:EntryIfTagged&gt;
+&lt;mt:SetVarBlock name="curentry"&gt;&lt;mt:EntryID /&gt;&lt;/mt:SetVarBlock&gt;
+&lt;mt:SetVarBlock name="relatedtags"&gt;&lt;mt:EntryTags glue=" OR "&gt;&lt;mt:TagName /&gt;&lt;/mt:EntryTags&gt;&lt;/mt:SetVarBlock&gt;
+&lt;mt:SetVarBlock name="listitems"&gt;&lt;mt:Entries tags="$relatedtags" unique="1" lastn="10"&gt;&lt;mt:SetVarBlock name="listentry"&gt;&lt;mt:EntryID /&gt;&lt;/mt:SetVarBlock&gt;&lt;mt:Unless name="listentry" eq="$curentry"&gt;&lt;li&gt;&lt;a href="&lt;mt:EntryPermaLink /&gt;"&gt;&lt;mt:EntryTitle /&gt;&lt;/a&gt;&lt;/li&gt;&lt;/mt:Unless&gt;&lt;/mt:Entries&gt;&lt;/mt:SetVarBlock&gt;
+&lt;mt:If name="listitems"&gt;
+&lt;div class="my_related_entries"&gt;
+&lt;h4&gt;Related Entries&lt;span class="delimiter"&gt;:&lt;/span&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;mt:Var name="listitems"&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/mt:If&gt;
+&lt;/mt:EntryIfTagged&gt;
+</code></pre>
+<p>保存后，在模版Entry中需要添加相关文章的位置导入该模版即可。</p>
+<h3>2. 文章信息</h3>
+<p>看到互联网上很多博客在文章末尾会注上文章的版权信息，永久链接等，MTOS默认没有生成这些信息，所以利用MTOS的标签自定义了一个模版entry_info，代码如下：</p>
+<pre><code>&lt;div class="my_entry_info"&gt;
+&lt;h4&gt;Entry Info&lt;span class="delimiter"&gt;:&lt;/span&gt;&lt;/h4&gt;
+&lt;ul type="circle"&gt;
+&lt;li&gt;Name&lt;span class="delimiter"&gt;:&lt;/span&gt;&lt;a href="&lt;$mt:EntryPermalink$&gt;"&gt;&lt;$mt:EntryTitle$&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Link&lt;span class="delimiter"&gt;:&lt;/span&gt;&lt;a href="&lt;$mt:EntryPermalink$&gt;"&gt;&lt;$mt:EntryPermalink$&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Author&lt;span class="delimiter"&gt;:&lt;/span&gt;By &lt;$mt:EntryAuthorLink show_hcard="1"$&gt; on &lt;$mt:EntryDate format="%x %X"$&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</code></pre>
+<p>在Entry模版的文章末尾处，导入该模版即可。</p>
+<h3>3. 友情链接</h3>
+<p>为了让大家知道我经常阅读的一些博客，自定义了一个小工具friend_links，根据博客的布局样式，在合适的位置拖入这个小工具即可。本站使用的是三栏式结构，友情链接添加在副侧边栏的最后。</p>
+<h3>4. 分享和订阅</h3>
+<p>为了方便分享和订阅本站，对比了一些常见的社会化分享工具，如<a href="http://addthis.org.cn/">addthis</a>，<a href="http://www.jiathis.com/">jiathis</a>，<a href="http://www.bshare.cn/">bShare</a>，在分享服务、自定义、数据统计、性能等方面各有长短，并未做十分仔细的对比和分析，因addthis在社会化分享的同时，还提供了订阅按钮，为了保证本站页面的一致性，最终选择addthis。</p>
+<p>这里仍然采用创建模版或小工具的方式来添加自定义的分享和订阅代码，同样在Entry模版合适的位置导入该模版或插件即可，最终效果见本站。</p>
+<h3>5. 社会化评论</h3>
+<p>MTOS自动的评论系统因带有防Spam功能，响应比较慢，不是很友好。同样，为了提高响应速度和友好性，对比了一些常见的社会化评论系统，如<a href="http://disqus.com/">disqus</a>,<a href="http://duoshuo.com/">多说</a>等。这些评论系统均有常用的评论功能，不同的是还支持微博等多账户登录；评论内容由第三方平台托管，支持邮件通知、评论统计、评论的导入导出等。对于评论负荷较重的主机，可以采用社会化评论系统取代自带的评论功能。多说比较适合国内的博客，在国外可能disqus使用得更为广泛，因本站VPS在国外，以及并没有将MTOS中文化的计划，所以本站采用disqus。</p>
+<p>disqus安装比较简单，注册后，根据向导设置网站，拷贝生成的评论代码，并创建模版，同样在Entry模版合适的位置导入该模版即可，最终效果见本站。</p>
+<h2>插件</h2>
+<p>MTOS自带的Web编辑器不太好用，尤其是添加图片和代码片段时。在官方网站中，找到了一个所见即所得的Web编辑器CKEditor，进行配置后，只适用于Excerpt的编辑，而在Body编辑时，没有CKeditor的踪影，不知是版本不正确，还是设置出了纰漏，目前尚未处理。</p>
+<p>粘贴代码片段时，一款代码格式化和高亮插件，可以让代码更易读，博客也更整洁干净，目前尚未处理。</p>
+<h2>常用页面</h2>
+<h3>1. Contact</h3>
+<p><a href="http://www.dylanninin.com/blog/pages/message.html">联系页面</a>，大家若有任何意见和建议，可以在这里留言，或者发邮件。</p>
+<h3>2. About</h3>
+<p><a href="http://www.dylanninin.com/blog/pages/about.html">关于本站</a>，提供站点、站长的基本信息，有助于理解和交流。</p>
+<h3>3. 404</h3>
+<p><a href="http://www.dylanninin.com/foo/bar.html">Not Found</a>，当访问不存在的资源时，会提示资源找不到。</p>
+<h3>4. 403</h3>
+<p><a href="http://www.dylanninin.com/blog/errors">Forbidden</a>，当访问链接存在但由于某些原因服务器拒绝请求时，会提示禁止访问。</p>
+<h3>5. 500</h3>
+<p>当然，除了404,403页面，还有一个500页面，但用户正常访问时，最好不要出现此页面。</p>
+<h2>参考</h2>
+<ul>
+<li><a href="http://www.ezloo.com/mt/manual/entry_tag_entries.html">MT之旅</a></li>
+</ul> 
+                </div>
+        </div>
+</div>
+
+                                </div>
+                        </div>
+                </div>
+        </div>
+        <div id="footer">
+
+        <div class="modal-footer">
+                <p class="text-center">
+                        Blog of <a href="/">dylan</a>.
+                        Follow me on <a href="https://twitter.com/dylanninin" target="_blank">twitter</a>
+                        or <a href="http://weibo.com/dylanninin" target="_blank">weibo</a>
+                </p>
+                <p class="text-center">
+                        UI Designed by <a href="http://twitter.github.com/bootstrap" target="_blank">Twitter
+                                Bootstrap</a>.
+                        Powered by <a href="http://webpy.org" target="_blank">Web.py</a>.
+                        Hosted by <a href="http://www.linode.com" target="_blank">Linode</a>.
+                        Licensed under <a
+                                href="http://creativecommons.org/licenses/by-nc-nd/3.0/" target="_blank">CC BY
+                                3.0</a>
+                </p>
+                <p class="text-center">
+                        Copyright &copy <a href="/">CLOUD</a> |
+                        <a href="/about.html">About</a>
+                </p>
+
+        </div>
+        <script src="/static/js/jquery.js"></script>
+        <script src="/static/js/jquery-3.1.1.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+</div>
+
+</body>
+</html>

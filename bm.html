@@ -1,0 +1,75 @@
+<html>
+<head>
+    <script type="text/javascript">
+    function GetDateDiff(startTime, endTime, diffType) {
+        startTime = startTime.replace(/\-/g, "/");
+        endTime = endTime.replace(/\-/g, "/");
+
+        diffType = diffType.toLowerCase();
+        var sTime =new Date(startTime); 
+        var eTime =new Date(endTime);
+        var divNum =1;
+        switch (diffType) {
+            case"second":
+                divNum =1000;
+                break;
+            case"minute":
+                divNum =1000*60;
+                break;
+            case"hour":
+                divNum =1000*3600;
+                break;
+            case"day":
+                divNum =1000*3600*24;
+                break;
+            default:
+                break;
+        }
+        return parseInt((eTime.getTime() - sTime.getTime()) / parseInt(divNum));
+    }
+
+    function getNowFormatDate()
+    {
+        var date = new Date();
+        var seperator1 = "-";
+        var seperator2 = ":";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+                + " " + date.getHours() + seperator2 + date.getMinutes()
+                + seperator2 + date.getSeconds();
+        return currentdate;
+    }
+    </script>
+    <style type="text/css">
+    #wrapper {display:table;margin:0 auto;}
+    #cell{display:table-cell; vertical-align:middle;}
+    </style>
+    <meta http-equiv="refresh" content="1">
+</head>
+
+<body>
+<script type="text/javascript">
+    var print_string = ""
+    var data = 0;
+    var cur_time = "";
+    cur_time = getNowFormatDate()
+    data = GetDateDiff(cur_time, "2017-06-09 20:20:00", "second")
+    print_string = print_string + parseInt(data/3600/24) + "days "
+    data = (data%(3600*24))
+    print_string = print_string + parseInt(data/3600) + "hours "
+    data = data % 3600
+    print_string = print_string + parseInt(data/60) + "minutes "
+    data = data % 60
+    print_string = print_string + data + "seconds"
+    print_string = "<div id=\"wrapper\"><div id=\"cell\"><h1>"+print_string+"</h1></div></div>"
+    document.write(print_string);
+</script>
+</body>
+</html>

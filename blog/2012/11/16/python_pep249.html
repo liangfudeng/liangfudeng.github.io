@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang='zh'>
+        <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="//cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>python pep249</title>
+</head>
+
+<body>
+        <div id="header">
+    <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                        <div class="navbar-header">
+                                <a class="navbar-brand" href="/">CLOUD</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="example-navbar-collapse">
+                                <ul class="nav navbar-nav">
+                                        <li><a href="/tweet"><i class="icon-retweet icon-white"></i>Tweets</a></li>
+                                        <li><a href="/archive.html"><i class="icon-book icon-white"></i>Archives</a></li>
+                                        <li><a href="/category.html"><i class="icon-th-list icon-white"></i>category</a></li>
+                                        <li><a href="/about.html"><i class="icon-user icon-white"></i>About</a></li>
+                                        <li class="dropdown">
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                                        Friend Links <b class="caret"></b>
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                        <li><a href="http://www.ruanyifeng.com/home.html" target="_blank">阮一峰</a></li>
+                                                        <li><a href="http://coolshell.cn/" target="_blank">陈皓haoel</a></li>
+                                                        <li><a href="http://www.dbanotes.net/" target="_blank">冯大辉Fenng</a></li>
+                                                        <li><a href="http://robbin.iteye.com/" target="_blank">范凯robbin</a></li>
+                                                        <li><a href="http://www.eygle.com/" target="_blank">盖国强eygle</a></li>
+                                                        <li><a href="http://blog.csdn.net/tianlesoftware" target="_blank">David Dai</a></li>
+                                                        <li><a href="http://www.joelonsoftware.com/" target="_blank">Joel Spolsky</a></li>
+                                                        <li><a href="http://mindhacks.cn/" target="_blank">刘未鹏MindHacks</a></li>
+                                                        <li><a href="http://www.my1510.cn/author.php?roseluqiu" target="_blank">闾丘露薇</a></li>
+                                                        <li><a href="http://www.dapenti.com/blog/" target="_blank">铂程斋dapenti</a></li>
+                                                </ul>
+                                        </li>
+                                </ul>
+                        </div>
+                </div>
+        </nav>
+</div>
+
+
+        <div id="content">
+                <div class="container">
+                        <div class="row">
+                                <div>
+                                        <div class="entry">
+        <div class="entry entry-detail">
+                    <div class="entry-header">
+                            <h1 class="entry-title">python pep249</h1>
+                            <div class="entry-meta">
+                                    <span class="entry-by">
+                                            <i class="icon-user"></i> <a href="/">dylan</a> on 2012-11-16 14:35:57
+                                    </span>
+                            </div>
+                    </div>
+                <div class="entry-content">
+                        <p>在项目开发中，数据库应用必不可少。<a href="http://www.python.org/dev/peps/pep-0249/">PEP 249</a> 即定义了使用Python访问数据库的一组通用规范，统一了不同数据库系统的访问模型。该规 范使得数据库访问模块更易于理解，在提供广泛的数据库连接支持的同时，也增强了应用在 不同数据库之间的可移植性。</p>
+<p>在Python Database API 2.0规范中，定义了API接口的各个部分，如模块接口，连接对象， 游标对象，类型对象和构造器，DB API的可选扩展以及可选的错误处理机制等。</p>
+<h2>标准模块接口</h2>
+<p>根据PEP 249规范，做了一个简单的示意图，根据不同类型做了简单的划分，并不一定与 Python对象一一对应。</p>
+<p><img alt="pep249" src="http://dylanninin.com/assets/images/2012/pep249.jpg" /></p>
+<h2>1.模块接口</h2>
+<p>Module Interface
+Python代码与数据库交互的模块接口，必须提供获取数据库连接的构造方法。</p>
+<p>通过调用connect(parameters.. )即可返回数据库连接对象Connection Object，</p>
+<ul>
+<li>connect(parameters... )：获取数据库连接。其中parameters为数据源、用户、密码、数
+据库等，根据不同数据库可选不同参数。</li>
+</ul>
+<h2>2.数据库连接对象</h2>
+<p>Connection Object
+数据库连接对象主要提供获取数据库游标对象、并提交/回滚事务的方法，以及关闭数据库
+连接。</p>
+<ul>
+<li>close()：关闭数据库连接</li>
+<li>commit()：提交事务</li>
+<li>rollback()：回滚事务</li>
+<li>cursor()：获取游标对象，操作数据库，如执行DML操作，调用存储过程等</li>
+</ul>
+<h2>3.全局常量</h2>
+<p>Gobals Constants
+定义一些DB API相关的全局常量，在标准接口中，主要如下：</p>
+<ul>
+<li>apilevel：当前DB API版本，如"1.0"，或"2.0"</li>
+<li>
+<p>threadsafety：整型常量，定义支持的线程安全类型，主要是是否可以在线程之间共享模块、连接对象以及游标对象。</p>
+<ul>
+<li>0        不可共享该模块</li>
+<li>1        可共享该模块，但不能共享连接对象</li>
+<li>2        可共享该模块和连接对象</li>
+<li>3        可共享该模块、连接对象和游标独享</li>
+</ul>
+</li>
+<li>
+<p>paramstyle：接口参数占位符所支持的样式。因易读性和灵活性，推荐使用numeric，named，pyformat</p>
+</li>
+<li>qmark        问号符样式，如 ...WHERE name=?</li>
+<li>numeric     数字序号样式，如 ...WHERE name=:1</li>
+<li>named      命名参数样式，如 ...WHERE name=:name</li>
+<li>format      ANSI C语言printf格式化编码样式如 e.g. ...WHERE name=%s</li>
+<li>pyformat    Python扩展编码样式如 ...WHERE name=%(name)s</li>
+</ul>
+<h2>4.异常体系</h2>
+<p>Exceptions
+异常体系主要用于定义DB API相关的异常，包括警告，错误，数据相关的异常，接口相关的
+异常等等。</p>
+<ul>
+<li>Warning ：数据在执行插入操作时被截断，等等</li>
+<li>Error ：这里提到的除 Warning 外的所有异常的基类</li>
+<li>InterfaceError ： 数据库接口而非数据库本身故障</li>
+<li>DatabaseError ： 严格意义上的数据库问题</li>
+<li>DataError ： 包含如下结果数据的问题除数为 0，值超出范围等</li>
+<li>OperationalError ： 与编程人员无关的数据库错误：连接丢失、内存分配错误、事务处理错误等</li>
+<li>IntegrityError ： 数据库的关系完整性受到了影响，例如，外键约束失败</li>
+<li>InternalError ： 数据库遇到内部错误，例如，游标无效、事务不同步</li>
+<li>ProgrammingError ： 未找到表、SQL 语句中的语法错误、指定参数的数量错误等</li>
+<li>NotSupportedError ： 调用的 API 部件并不存在</li>
+</ul>
+<h2>5.游标对象</h2>
+<p>Cursor Object
+游标对象代表数据库中的游标，用于指示抓取数据操作的上下文。主要提供执行SQL语句、
+调用存储过程、获取查询结果等方法。</p>
+<ul>
+<li>description：数据库列类型和值的描述信息</li>
+<li>rowcount：回返结果的行数统计信息，如SELECT,UPDATE,CALLPROC等</li>
+<li>callproc(procname,[, parameters])：调用存储过程，需要数据库支持</li>
+<li>close()：关闭当前游标</li>
+<li>execute(operation[, parameters])：执行数据库操作，SQL语句或者数据库命令</li>
+<li>executemany(operation, seq_of_params)：用于批量操作，如批量更新</li>
+<li>fetchone()：获取查询结果集中的下一条记录</li>
+<li>fetchmany(size)：获取指定数量的记录</li>
+<li>fetchall()：获取结构集的所有记录</li>
+<li>arraysize：指定使用fetchmany()获取的行数，默认为1</li>
+<li>setinputsizes(sizes)：设置在调用<code>execute*()</code>方法时分配的内存区域大小</li>
+<li>setoutputsize(sizes)：设置列缓冲区大小，对大数据列入LONGS，BLOBS尤其有用</li>
+</ul>
+<h2>6.数据类型和构造器</h2>
+<p>Type and Constructor</p>
+<p>1）Type
+Type定义了Python的数据类型和数据库中表列类型的转换和对应关系。</p>
+<ul>
+<li>STRING： 对应数据库中基于字符串的数据类型，如char，varchar</li>
+<li>BINARY： 对应数据库中的二进制类型，如long, row, blob</li>
+<li>NUMBER： 对应数据库中的数字类型，如number</li>
+<li>DATETIME： 对应数据库中的时间类型，如date, time</li>
+<li>ROWID：对应数据库中的row id</li>
+<li>None：对应数据库中的NULL</li>
+</ul>
+<p>2）Constructor</p>
+<p>Constructor是一组用于构造特殊数据类型的构造器，可以通过指定参数构造并返回预期对
+象。</p>
+<ul>
+<li>Date(year, month, day)：构造日期对象</li>
+<li>Time(hour, minute, second)：构造时间对象</li>
+<li>Timestamp(year, month, day, hour, minute, second)：构造时间戳对象</li>
+<li>DateFromTicks(ticks)：通过从计算机计时开始经过的秒数构造日期对象；即从1970年1月1日0时0分0秒起计算</li>
+<li>TimeFromTicks(ticks)：同上，用于构造时间对象</li>
+<li>TimestampFromTicks(ticks)：同上，用于构造时间戳对象</li>
+<li>Binary(string)：从字符串构造二进制对象 扩展模块接口</li>
+</ul>
+<p>扩展模块可以参考官方文档，这里暂不提及。</p>
+<h2>参考</h2>
+<ul>
+<li><a href="http://www.python.org/dev/peps/pep-0249/">PEP 249</a> </li>
+<li><a href="http://www.python.org/dev/peps/pep-0248">PEP 248</a> </li>
+<li><a href="https://wiki.python.org/moin/DatabaseInterfaces">DatabaseInterfaces</a> </li>
+</ul> 
+                </div>
+        </div>
+</div>
+
+                                </div>
+                        </div>
+                </div>
+        </div>
+        <div id="footer">
+
+        <div class="modal-footer">
+                <p class="text-center">
+                        Blog of <a href="/">dylan</a>.
+                        Follow me on <a href="https://twitter.com/dylanninin" target="_blank">twitter</a>
+                        or <a href="http://weibo.com/dylanninin" target="_blank">weibo</a>
+                </p>
+                <p class="text-center">
+                        UI Designed by <a href="http://twitter.github.com/bootstrap" target="_blank">Twitter
+                                Bootstrap</a>.
+                        Powered by <a href="http://webpy.org" target="_blank">Web.py</a>.
+                        Hosted by <a href="http://www.linode.com" target="_blank">Linode</a>.
+                        Licensed under <a
+                                href="http://creativecommons.org/licenses/by-nc-nd/3.0/" target="_blank">CC BY
+                                3.0</a>
+                </p>
+                <p class="text-center">
+                        Copyright &copy <a href="/">CLOUD</a> |
+                        <a href="/about.html">About</a>
+                </p>
+
+        </div>
+        <script src="/static/js/jquery.js"></script>
+        <script src="/static/js/jquery-3.1.1.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+</div>
+
+</body>
+</html>
