@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title><![CDATA[lsa和nssa理解（转）]]></title>
+    <url>%2F2017%2F12%2F14%2Flsa%2F</url>
+    <content type="text"><![CDATA[OSPF的区域类型和LSA类型这两个知识点，经常容易导致人们对他们理解上的混乱，今天就来谈谈这两个概念。本文将会以下面这个拓扑图为例进行讲解。 LSA Type，链路状态通告的类型本来想先讲区域类型，但是由于要理解不同类型的区域，必然要涉及到不同类型的LSA，现在把LSA放到前面先讲。我们这里谈谈常见的几种LSA：1、2、3、4、5、7类LSA。 1类LSA，路由器LSA。OSPF网络中所有路由器都会产生1类LSA，他的意思就是表示路由器自己在本区域内的直连链路信息。该LSA仅在本区域内传播。其中，Link ID跟ADV Router写的都是该路由器的RouterID。下图为1类LSA： 2类LSA，网络LSA。在广播或者非广播模式下（NBMA）由DR生成。该LSA仅在本区域内传播。2类LSA表达的意思应该是：某区域内，在广播或非广播的网段内选举了DR，于是DR在本区域范围利用2类LSA来进行通告。该LSA仅在本区域内传播。其中，该LSA的Link ID就是该DR的接口IP地址，而ADV Router则是DR的Router ID。 3类LSA，网络汇总LSA。由区域边界路由器ABR生成，用于将一个区域内的网络通告给OSPF中的其他区域。可以认为3类LSA保存着本区域以外的所有其他区域的网络。举个例子，在多区域的环境如1-0-2这样的三个区域，含有area1和area0的ABR会把area1的网络以3类LSA的形式通告给area0，当然它也会把area0里面的网络通告给area1。那么，area1里面的网络又是如何通告到area2呢？这里就要考虑到area1那些一开始被转换成3类LSA的网络，是如何进入到area2的问题了。当原先这个3类LSA进入到area0跟area2的边界路由器时，位于这个边界的ABR就把这条包含着area1链路信息的3类LSA进行修改，修改的内容是把里面的ADV Router替换成自己的Router ID，并且维持原先的Link ID不变，然后把这条修改后的LSA通告给area2，这个就是3类LSA的工作过程。 4类LSA，ASBR汇总LSA。4类LSA跟5类LSA是紧密联系在一起的，可以说4类LSA是由于5类LSA的存在而产生的。4类LSA由距离本路由器最近的ABR生成，这句话应该要这样来理解：如果路由器想要找到包含了外部路由的那台ASBR（自治系统边界路由器）的话，你应该要到达哪台ABR，这台ABR的Router ID就写在该LSA的ADV Router里面，而LSA里面的Link ID代表的是该ASBR的Router ID。 5类LSA，外部的LSA。5类LSA由包含了外部路由的ASBR产生，目标是把某外部路由通告给OSPF进程的所有区域（特殊区域除外，下面会提到）。5类LSA可以穿越所有区域，意思是在跨区域通告时，该LSA的Link ID和ADV Router一直保持不变。通俗一点来说，就像是该ASBR对OSPF全网络的所有路由器说，我有这个外部路由，想去的话就来找我吧！其中，Link ID代表的是那台ASBR所引入的网络，ADV Router则是该ASBR的Router ID。下图为5类LSA： 7类LSA7类LSA是一种由NSSA区域中引入了外部路由的路由器生成的LSA，他仅在NSSA本区域内传播。由于NSSA区域不允许外部的路由进来从而禁止了5类LSA，那么为了能够把自己的外部路由传播出去，于是使用了7类LSA来代替5类LSA的功能。值得注意的一点是，当这种7类LSA到达NSSA跟其他区域的边界后，该边界路由器会根据这条7类LSA。生成对应的5类LSA然后继续传播给其他区域。此时，这条5类的LSA里面的Link ID跟7类LSA一样，都是该外部网络地址，而ADV Router则变成了该边界路由器的Router ID，因为这条5类LSA本来就是边界路由器产生的。这里要注意的一点是，该5类LSA里面的Forwarding Address还是保持跟之前的7类LSA的Forwarding Address一样。 Area Type，区域类型OSPF的区域类型分为5种：Backbone area(area 0)、Standard area、Stub area、Totally stubby area、No so stubby area(NSSA)。下面来逐一介绍。 1、Backbone area也叫骨干区域，其实就是area 0。根据OSPF的设计原则，area 0在OSPF网络中起着中心节点的作用，其他区域的链路信息通过area 0来进行相互传递，这也意味着所有其他区域都必须跟area 0相连。该区域支持1、2、3、4、5类LSA。 2、Standard area也叫标准区域，标准区域的意思就是在这个区域里面可以正常传递OSPF各类报文。该区域支持1、2、3、4、5类LSA。 3、Stub area也叫末节区域，所谓末节区域，意思就是该区域不接受非OSPF网络的任何外部路由（external route），它如果要到达那些外部路由的时候，只需要通过默认路由把它发出去就可以了。该区域支持1、2、3类LSA。 4、Totally stubby area也叫完全末节区域，他的意思是该区域非但不接受外部路由，也不接受自己本区域以外的其他区域的链路信息。它如果要到达本区域以外的目标网络的时候，也是跟末节区域一样，直接把报文通过默认路由发出去。这里要注意的是，由于默认路由是用3类LSA发送的，所以完全末节区域虽然不允许普通的3类LSA报文，但是支持这种包含默认路由的3类LSA。该区域支持1、2类LSA，以及包含默认路由的3类LSA。 5、No so stubby area就是平时所说的NSSA了，这个NSSA其实是从stub区域发展而来的，它的意思是在含有stub区域的条件下，还拥有可以发送外部路由出去给其他区域的能力。该区域支持1、2、3、7类LSA。这里注意一点的是，NSSA区域还有另外一种模式，那就是是完全末节区域模式的NSSA。这个模式其实就是在完全末节区域环境下允许引入外部路由，这种区域模式支持1、2类LSA以及包含默认路由的3类LSA。 配置12area 24 stubarea 24 stub no-summary]]></content>
+      <categories>
+        <category>network</category>
+      </categories>
+      <tags>
+        <tag>lsa</tag>
+        <tag>ospf</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[网卡NPAI]]></title>
+    <url>%2F2017%2F12%2F11%2Fnapi%2F</url>
+    <content type="text"><![CDATA[NAPI是linux新的网卡数据处理API，据说是由于找不到更好的名字，所以就叫NAPI(New API)，在2.5之后引入。 简单来说，NAPI是综合中断方式与轮询方式的技术。 中断的好处是响应及时，如果数据量较小，则不会占用太多的CPU事件；缺点是数据量大时，会产生过多中断， 而每个中断都要消耗不少的CPU时间，从而导致效率反而不如轮询高。轮询方式与中断方式相反，它更适合处理 大量数据，因为每次轮询不需要消耗过多的CPU时间；缺点是即使只接收很少数据或不接收数据时，也要占用CPU 时间。 NAPI是两者的结合，数据量低时采用中断，数据量高时采用轮询。平时是中断方式，当有数据到达时，会触发中断 处理函数执行，中断处理函数关闭中断开始处理。如果此时有数据到达，则没必要再触发中断了，因为中断处理函 数中会轮询处理数据，直到没有新数据时才打开中断。 很明显，数据量很低与很高时，NAPI可以发挥中断与轮询方式的优点，性能较好。如果数据量不稳定，且说高不高 说低不低，则NAPI则会在两种方式切换上消耗不少时间，效率反而较低一些。]]></content>
+      <categories>
+        <category>network</category>
+      </categories>
+      <tags>
+        <tag>napi</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[C语言构造函数]]></title>
+    <url>%2F2017%2F12%2F11%2Fc_constructor%2F</url>
+    <content type="text"><![CDATA[说起这个属性，要从fio的vpp说起，引擎的注册函数fio_libaio_register与反注册函数fio_libaio_unregister都没有其他函数调用，而fio又没有以动态库的形式将这两个函数供别的地方使用,但是这两个函数有宏定义fio_init和fio_exit来修饰。这个两个个宏定义为：12#define fio_init __attribute__((constructor)) #define fio_exit __attribute__((destructor)) 以如下构造函数为例,这是vpp中的代码：12345678910111213#define VLIB_DECLARE_INIT_FUNCTION(x, tag) \vlib_init_function_t * _VLIB_INIT_FUNCTION_SYMBOL (x, tag) = x; \static void __vlib_add_##tag##_function_##x (void) \ __attribute__((__constructor__)) ; \static void __vlib_add_##tag##_function_##x (void) \&#123; \ vlib_main_t * vm = vlib_get_main(); \ static _vlib_init_function_list_elt_t _vlib_init_function; \ _vlib_init_function.next_init_function \ = vm-&gt;tag##_function_registrations; \ vm-&gt;tag##_function_registrations = &amp;_vlib_init_function; \ _vlib_init_function.f = &amp;x; \&#125; 这个两个属性是gcc提供的属性，在dpdk中也有体现。若函数被设定为constructor属性，则该函数会在main（）函数执行之前被自动的执行。若函数被设定为destructor属性，则该函数会在main（）函数执行之后或者exit（）被调用后被自动的执行。通过如下测试代码，能更加清晰地认识到这两个属性的作用：123456789101112131415#include &lt;stdio.h&gt; #include &lt;stdlib.h&gt; void __attribute__((constructor)) con_func() &#123; printf(&quot;befor main: constructor is called..\n&quot;); &#125; void __attribute__((destructor)) des_func() &#123; printf(&quot;after main: destructor is called..\n&quot;); &#125; int main() &#123; printf(&quot;main func..\n&quot;); return 0; &#125; 结果：123befor main: constructor is called.. main func.. after main: destructor is called..]]></content>
+      <categories>
+        <category>c语言</category>
+      </categories>
+      <tags>
+        <tag>构造函数</tag>
+        <tag>c语言</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[vpp常用命令]]></title>
+    <url>%2F2017%2F11%2F28%2Fvpp_command%2F</url>
+    <content type="text"><![CDATA[set123456789101112create sub BondEthernet0 834 创建子接口，tag是834set interface ip table BondEthernet0.834 1 将此接口设置在fib 1里set interface ip address BondEthernet0.834 192.168.0.250/24 设置接口ipset interface state BondEthernet0.834 up up接口set interface l2 bridge BondEthernet0.834 834 将此接口设置到bridge 834里set ip arp GigabitEthernet2/6/0 192.168.2.2 00:0c:29:dc:96:f8 设置静态arpip route add 1.2.3.0/24 via GigabitEthernet2/6/0 添加路由create vhost socket /tmp/sock2.sock server 创建vhost接口l2fib add fa:16:3e:b0:a9:71 834 BondEthernet0.834 添加二层转发流表create host-interface name vpp5a 创建veth口，name后参数名字必须和Linux里创建的veth口名字对应set dpdk interface descriptors TenGigabitEthernet6/0/0 tx/rx 1024 设置发送或是接收队列大小set dpdk interface descriptors interface0/0/0 rx/tx 1024设置此接口rx或是tx队列大小，intel人说2000-4000差距不大 trace123trace add dpdk-input 8 跟踪dpdk接口数据包 （dpdk-input是节点的名字，想跟踪任何节点都可以）trace add vhost-user-input 8 跟踪vhost接口数据包trace add af-packet-input 8 跟踪veth接口数据包 show1234567891011show hardware-interfaces 查看接口macshow vlib graph 查看node逻辑图show threads 查看vpp线程show l2fib 查看二层转发流表show ip fib 查看路由表show ip arp 查看arpshow affinity 查看主线程cpu亲和性show version 查看vpp版本show int 查看接口统计show interfacesaddress 查看接口ipshow bridge-domain 查看bridge 接口情况]]></content>
+      <categories>
+        <category>vpp</category>
+      </categories>
+      <tags>
+        <tag>vpp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Hello World]]></title>
+    <url>%2F2017%2F11%2F28%2Fhello-world%2F</url>
+    <content type="text"><![CDATA[Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new "My New Post" More info: Writing Run server1$ hexo server More info: Server Generate static files1$ hexo generate More info: Generating Deploy to remote sites1$ hexo deploy More info: Deployment]]></content>
+      <categories>
+        <category>test</category>
+      </categories>
+      <tags>
+        <tag>hello</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[vpp load balance 实例配置]]></title>
+    <url>%2F2017%2F11%2F28%2Fvpp_lb%2F</url>
+    <content type="text"><![CDATA[VPP LoadBalancer 号称是对google maglev的复刻版，所以忍不住要试用一下。在CentOS 7.2上面安装非常快速,因为vpp为centos提供了repo源和打包好的vpp程序。 安装 12参见官网的安装程序： https://docs.google.com/document/d/1zqYN7qMavgbdkPWIJIrsPXlxNOZ_GhEveHQxpYr3qrg/edit LoadBalancer拓扑VPP-Server: 192.168.2.2/24VPP-VIP: 192.168.1.2Real-Server-A: 192.168.2.3/24Real-Server-B: 192.168.2.4/24 配置vpp$ dpdk_nic_bind -s$ modprobe uio_pci_generic 这里根据网卡的pci来设置$ dpdk_nic_bind -b uio_pci_generic 0000:0b:00.0$ sysctl -w vm.nr_hugepages=2048$ vim /etc/vpp/startup.confdpdk { uio-driver uio_pci_generic dev 0000:0b:00.0 socket-mem 1024} 启动vpp$ service vpp start 配置网卡地址$ vppctl$ show int$ set int state GigabitEthernetb/0/0 up$ set int ip address GigabitEthernetb/0/0 192.168.2.2/24$ show int address$ show hardware$ show ip arp$ show ip fib 配置LoadBalancer$ vppctl$ lb conf ip4-src-address 192.168.2.2 timeout 3$ lb vip 192.168.1.2/32 encap gre4 new_len 1024$ lb as 192.168.1.2/32 192.168.2.3 192.168.2.4$ show lb vip verbose 配置其中一台Real Server$ ip tunnel add tun0 mode gre local 192.168.2.3 remote 192.168.2.2 ttl 255$ ifconfig tun0 192.168.2.2/32 up$ echo 1 &gt; /proc/sys/net/ipv4/conf/tun0/arp_ignore$ echo 2 &gt; /proc/sys/net/ipv4/conf/tun0/arp_announce$ echo 0 &gt; /proc/sys/net/ipv4/conf/tun0/rp_filter$ echo 0 &gt; /proc/sys/net/ipv4/conf/all/rp_filter$ echo 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore$ echo 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce 结论小包的转发性能确实因为用了dpdk达到了不少的提升，基本上是线性转发。默认用的RR轮询策略，还没有地方可以配置转发策略。目前还没有health monitor，所以即使移除RealServer也依然会向那个地址转发。要上生产，还需要解决以上问题。]]></content>
+      <categories>
+        <category>vpp</category>
+      </categories>
+      <tags>
+        <tag>vpp</tag>
+      </tags>
+  </entry>
+</search>

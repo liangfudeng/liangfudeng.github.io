@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>dengliangfu&#39;s blog</title>
+  
+  <subtitle>学无止境</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2017-12-15T01:56:12.003Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>denglianfu</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>lsa和nssa理解（转）</title>
+    <link href="http://yoursite.com/2017/12/14/lsa/"/>
+    <id>http://yoursite.com/2017/12/14/lsa/</id>
+    <published>2017-12-15T01:56:12.031Z</published>
+    <updated>2017-12-15T01:56:12.003Z</updated>
+    
+    <content type="html"><![CDATA[<p>  OSPF的区域类型和LSA类型这两个知识点，经常容易导致人们对他们理解上的混乱，今天就来谈谈这两个概念。<br>本文将会以下面这个拓扑图为例进行讲解。</p><h1 id="LSA-Type，链路状态通告的类型"><a href="#LSA-Type，链路状态通告的类型" class="headerlink" title="LSA Type，链路状态通告的类型"></a>LSA Type，链路状态通告的类型</h1><p>本来想先讲区域类型，但是由于要理解不同类型的区域，必然要涉及到不同类型的LSA，现在把LSA放到前面先讲。<br>我们这里谈谈常见的几种LSA：1、2、3、4、5、7类LSA。</p><h2 id="1类LSA，路由器LSA。"><a href="#1类LSA，路由器LSA。" class="headerlink" title="1类LSA，路由器LSA。"></a>1类LSA，路由器LSA。</h2><p>OSPF网络中所有路由器都会产生1类LSA，他的意思就是表示路由器自己在本区域内的直连链路信息。该LSA仅在本区域内传播。其中，Link ID跟ADV Router写的都是该路由器的RouterID。<br>下图为1类LSA：</p><h2 id="2类LSA，网络LSA。"><a href="#2类LSA，网络LSA。" class="headerlink" title="2类LSA，网络LSA。"></a>2类LSA，网络LSA。</h2><p>在广播或者非广播模式下（NBMA）由DR生成。该LSA仅在本区域内传播。2类LSA表达的意思应该是：某区域内，在广播或非广播的网段内选举了DR，于是DR在本区域范围利用2类LSA来进行通告。该LSA仅在本区域内传播。其中，该LSA的Link ID就是该DR的接口IP地址，而ADV Router则是DR的Router ID。</p><h2 id="3类LSA，网络汇总LSA。"><a href="#3类LSA，网络汇总LSA。" class="headerlink" title="3类LSA，网络汇总LSA。"></a>3类LSA，网络汇总LSA。</h2><p>由区域边界路由器ABR生成，用于将一个区域内的网络通告给OSPF中的其他区域。可以认为3类LSA保存着本区域以外的所有其他区域的网络。举个例子，在多区域的环境如1-0-2这样的三个区域，含有area1和area0的ABR会把area1的网络以3类LSA的形式通告给area0，当然它也会把area0里面的网络通告给area1。那么，area1里面的网络又是如何通告到area2呢？这里就要考虑到area1那些一开始被转换成3类LSA的网络，是如何进入到area2的问题了。当原先这个3类LSA进入到area0跟area2的边界路由器时，位于这个边界的ABR就把这条包含着area1链路信息的3类LSA进行修改，修改的内容是把里面的ADV Router替换成自己的Router ID，并且维持原先的Link ID不变，然后把这条修改后的LSA通告给area2，这个就是3类LSA的工作过程。</p><h2 id="4类LSA，ASBR汇总LSA。"><a href="#4类LSA，ASBR汇总LSA。" class="headerlink" title="4类LSA，ASBR汇总LSA。"></a>4类LSA，ASBR汇总LSA。</h2><p>4类LSA跟5类LSA是紧密联系在一起的，可以说4类LSA是由于5类LSA的存在而产生的。4类LSA由距离本路由器最近的ABR生成，这句话应该要这样来理解：如果路由器想要找到包含了外部路由的那台ASBR（自治系统边界路由器）的话，你应该要到达哪台ABR，这台ABR的Router ID就写在该LSA的ADV Router里面，而LSA里面的Link ID代表的是该ASBR的Router ID。</p><h2 id="5类LSA，外部的LSA。"><a href="#5类LSA，外部的LSA。" class="headerlink" title="5类LSA，外部的LSA。"></a>5类LSA，外部的LSA。</h2><p>5类LSA由包含了外部路由的ASBR产生，目标是把某外部路由通告给OSPF进程的所有区域（特殊区域除外，下面会提到）。5类LSA可以穿越所有区域，意思是在跨区域通告时，该LSA的Link ID和ADV Router一直保持不变。通俗一点来说，就像是该ASBR对OSPF全网络的所有路由器说，我有这个外部路由，想去的话就来找我吧！其中，Link ID代表的是那台ASBR所引入的网络，ADV Router则是该ASBR的Router ID。<br>下图为5类LSA：</p><h2 id="7类LSA"><a href="#7类LSA" class="headerlink" title="7类LSA"></a>7类LSA</h2><p>7类LSA是一种由NSSA区域中引入了外部路由的路由器生成的LSA，他仅在NSSA本区域内传播。由于NSSA区域不允许外部的路由进来从而禁止了5类LSA，那么为了能够把自己的外部路由传播出去，于是使用了7类LSA来代替5类LSA的功能。值得注意的一点是，当这种7类LSA到达NSSA跟其他区域的边界后，该边界路由器会根据这条7类LSA。生成对应的5类LSA然后继续传播给其他区域。此时，这条5类的LSA里面的Link ID跟7类LSA一样，都是该外部网络地址，而ADV Router则变成了该边界路由器的Router ID，因为这条5类LSA本来就是边界路由器产生的。这里要注意的一点是，该5类LSA里面的Forwarding Address还是保持跟之前的7类LSA的Forwarding Address一样。</p><h1 id="Area-Type，区域类型"><a href="#Area-Type，区域类型" class="headerlink" title="Area Type，区域类型"></a>Area Type，区域类型</h1><p>OSPF的区域类型分为5种：Backbone area(area 0)、Standard area、Stub area、Totally stubby area、No so stubby area(NSSA)。下面来逐一介绍。</p><h2 id="1、Backbone-area"><a href="#1、Backbone-area" class="headerlink" title="1、Backbone area"></a>1、Backbone area</h2><p>也叫骨干区域，其实就是area 0。根据OSPF的设计原则，area 0在OSPF网络中起着中心节点的作用，其他区域的链路信息通过area 0来进行相互传递，这也意味着所有其他区域都必须跟area 0相连。该区域支持1、2、3、4、5类LSA。</p><h2 id="2、Standard-area"><a href="#2、Standard-area" class="headerlink" title="2、Standard area"></a>2、Standard area</h2><p>也叫标准区域，标准区域的意思就是在这个区域里面可以正常传递OSPF各类报文。该区域支持1、2、3、4、5类LSA。</p><h2 id="3、Stub-area"><a href="#3、Stub-area" class="headerlink" title="3、Stub area"></a>3、Stub area</h2><p>也叫末节区域，所谓末节区域，意思就是该区域不接受非OSPF网络的任何外部路由（external route），它如果要到达那些外部路由的时候，只需要通过默认路由把它发出去就可以了。该区域支持1、2、3类LSA。</p><h2 id="4、Totally-stubby-area"><a href="#4、Totally-stubby-area" class="headerlink" title="4、Totally stubby area"></a>4、Totally stubby area</h2><p>也叫完全末节区域，他的意思是该区域非但不接受外部路由，也不接受自己本区域以外的其他区域的链路信息。它如果要到达本区域以外的目标网络的时候，也是跟末节区域一样，直接把报文通过默认路由发出去。这里要注意的是，由于默认路由是用3类LSA发送的，所以完全末节区域虽然不允许普通的3类LSA报文，但是支持这种包含默认路由的3类LSA。该区域支持1、2类LSA，以及包含默认路由的3类LSA。</p><h2 id="5、No-so-stubby-area"><a href="#5、No-so-stubby-area" class="headerlink" title="5、No so stubby area"></a>5、No so stubby area</h2><p>就是平时所说的NSSA了，这个NSSA其实是从stub区域发展而来的，它的意思是在含有stub区域的条件下，还拥有可以发送外部路由出去给其他区域的能力。该区域支持1、2、3、7类LSA。这里注意一点的是，NSSA区域还有另外一种模式，那就是是完全末节区域模式的NSSA。这个模式其实就是在完全末节区域环境下允许引入外部路由，这种区域模式支持1、2类LSA以及包含默认路由的3类LSA。</p><h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">area 24 stub</span><br><span class="line">area 24 stub no-summary</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;  OSPF的区域类型和LSA类型这两个知识点，经常容易导致人们对他们理解上的混乱，今天就来谈谈这两个概念。&lt;br&gt;本文将会以下面这个拓扑图为例进行讲解。&lt;/p&gt;
+&lt;h1 id=&quot;LSA-Type，链路状态通告的类型&quot;&gt;&lt;a href=&quot;#LSA-Type，链路状态通告的类
+      
+    
+    </summary>
+    
+      <category term="network" scheme="http://yoursite.com/categories/network/"/>
+    
+    
+      <category term="lsa" scheme="http://yoursite.com/tags/lsa/"/>
+    
+      <category term="ospf" scheme="http://yoursite.com/tags/ospf/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>网卡NPAI</title>
+    <link href="http://yoursite.com/2017/12/11/napi/"/>
+    <id>http://yoursite.com/2017/12/11/napi/</id>
+    <published>2017-12-12T07:07:19.457Z</published>
+    <updated>2017-12-12T07:07:19.440Z</updated>
+    
+    <content type="html"><![CDATA[<p>NAPI是linux新的网卡数据处理API，据说是由于找不到更好的名字，所以就叫NAPI(New API)，在2.5之后引入。</p><p>简单来说，NAPI是综合中断方式与轮询方式的技术。</p><p>中断的好处是响应及时，如果数据量较小，则不会占用太多的CPU事件；缺点是数据量大时，会产生过多中断，</p><p>而每个中断都要消耗不少的CPU时间，从而导致效率反而不如轮询高。轮询方式与中断方式相反，它更适合处理</p><p>大量数据，因为每次轮询不需要消耗过多的CPU时间；缺点是即使只接收很少数据或不接收数据时，也要占用CPU</p><p>时间。</p><p>NAPI是两者的结合，数据量低时采用中断，数据量高时采用轮询。平时是中断方式，当有数据到达时，会触发中断</p><p>处理函数执行，中断处理函数关闭中断开始处理。如果此时有数据到达，则没必要再触发中断了，因为中断处理函</p><p>数中会轮询处理数据，直到没有新数据时才打开中断。</p><p>很明显，数据量很低与很高时，NAPI可以发挥中断与轮询方式的优点，性能较好。如果数据量不稳定，且说高不高</p><p>说低不低，则NAPI则会在两种方式切换上消耗不少时间，效率反而较低一些。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;NAPI是linux新的网卡数据处理API，据说是由于找不到更好的名字，所以就叫NAPI(New API)，在2.5之后引入。&lt;/p&gt;
+&lt;p&gt;简单来说，NAPI是综合中断方式与轮询方式的技术。&lt;/p&gt;
+&lt;p&gt;中断的好处是响应及时，如果数据量较小，则不会占用太多的CPU事件；
+      
+    
+    </summary>
+    
+      <category term="network" scheme="http://yoursite.com/categories/network/"/>
+    
+    
+      <category term="napi" scheme="http://yoursite.com/tags/napi/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>C语言构造函数</title>
+    <link href="http://yoursite.com/2017/12/11/c_constructor/"/>
+    <id>http://yoursite.com/2017/12/11/c_constructor/</id>
+    <published>2017-12-12T01:57:00.707Z</published>
+    <updated>2017-12-12T01:57:00.691Z</updated>
+    
+    <content type="html"><![CDATA[<p>  说起这个属性，要从fio的vpp说起，引擎的注册函数fio_libaio_register与反注册函数fio_libaio_unregister都没有其他函数调用，而fio又没有以动态库的形式将这两个函数供别的地方使用,但是这两个函数有宏定义fio_init和fio_exit来修饰。这个两个个宏定义为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#define fio_init __attribute__((constructor))  </span><br><span class="line">#define fio_exit __attribute__((destructor))</span><br></pre></td></tr></table></figure></p><p>以如下构造函数为例,这是vpp中的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#define VLIB_DECLARE_INIT_FUNCTION(x, tag)                      \</span><br><span class="line">vlib_init_function_t * _VLIB_INIT_FUNCTION_SYMBOL (x, tag) = x; \</span><br><span class="line">static void __vlib_add_##tag##_function_##x (void)              \</span><br><span class="line">    __attribute__((__constructor__)) ;                          \</span><br><span class="line">static void __vlib_add_##tag##_function_##x (void)              \</span><br><span class="line">&#123;                                                               \</span><br><span class="line"> vlib_main_t * vm = vlib_get_main();                            \</span><br><span class="line"> static _vlib_init_function_list_elt_t _vlib_init_function;     \</span><br><span class="line"> _vlib_init_function.next_init_function                         \</span><br><span class="line">    = vm-&gt;tag##_function_registrations;                         \</span><br><span class="line">  vm-&gt;tag##_function_registrations = &amp;_vlib_init_function;      \</span><br><span class="line"> _vlib_init_function.f = &amp;x;                                    \</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>  这个两个属性是gcc提供的属性，在dpdk中也有体现。若函数被设定为constructor属性，则该函数会在main（）函数执行之前被自动的执行。若函数被设定为destructor属性，则该函数会在main（）函数执行之后或者exit（）被调用后被自动的执行。通过如下测试代码，能更加清晰地认识到这两个属性的作用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;  </span><br><span class="line">#include &lt;stdlib.h&gt;  </span><br><span class="line">void __attribute__((constructor)) con_func()  </span><br><span class="line">&#123;  </span><br><span class="line">    printf(&quot;befor main: constructor is called..\n&quot;);  </span><br><span class="line">&#125;  </span><br><span class="line">void __attribute__((destructor)) des_func()  </span><br><span class="line">&#123;  </span><br><span class="line">    printf(&quot;after main: destructor is called..\n&quot;);  </span><br><span class="line">&#125;  </span><br><span class="line">int main()  </span><br><span class="line">&#123;  </span><br><span class="line">    printf(&quot;main func..\n&quot;);  </span><br><span class="line">    return 0;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">befor main: constructor is called..  </span><br><span class="line">main func..  </span><br><span class="line">after main: destructor is called..</span><br></pre></td></tr></table></figure></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;  说起这个属性，要从fio的vpp说起，引擎的注册函数fio_libaio_register与反注册函数fio_libaio_unregister都没有其他函数调用，而fio又没有以动态库的形式将这两个函数供别的地方使用,但是这两个函数有宏定义fio_init和fio_e
+      
+    
+    </summary>
+    
+      <category term="c语言" scheme="http://yoursite.com/categories/c%E8%AF%AD%E8%A8%80/"/>
+    
+    
+      <category term="构造函数" scheme="http://yoursite.com/tags/%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0/"/>
+    
+      <category term="c语言" scheme="http://yoursite.com/tags/c%E8%AF%AD%E8%A8%80/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>vpp常用命令</title>
+    <link href="http://yoursite.com/2017/11/28/vpp_command/"/>
+    <id>http://yoursite.com/2017/11/28/vpp_command/</id>
+    <published>2017-11-29T06:41:35.675Z</published>
+    <updated>2017-11-29T06:41:35.607Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="set"><a href="#set" class="headerlink" title="set"></a>set</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">create sub BondEthernet0 834创建子接口，tag是834</span><br><span class="line">set interface ip table BondEthernet0.834 1将此接口设置在fib 1里</span><br><span class="line">set interface ip address BondEthernet0.834 192.168.0.250/24设置接口ip</span><br><span class="line">set interface state BondEthernet0.834 upup接口</span><br><span class="line">set interface l2 bridge BondEthernet0.834 834将此接口设置到bridge 834里</span><br><span class="line">set ip arp GigabitEthernet2/6/0 192.168.2.2 00:0c:29:dc:96:f8设置静态arp</span><br><span class="line">ip route add 1.2.3.0/24 via GigabitEthernet2/6/0添加路由</span><br><span class="line">create vhost socket /tmp/sock2.sock server创建vhost接口</span><br><span class="line">l2fib add fa:16:3e:b0:a9:71 834 BondEthernet0.834添加二层转发流表</span><br><span class="line">create host-interface name vpp5a 创建veth口，name后参数名字必须和Linux里创建的veth口名字对应</span><br><span class="line">set dpdk interface descriptors TenGigabitEthernet6/0/0 tx/rx 1024设置发送或是接收队列大小</span><br><span class="line">set dpdk interface descriptors interface0/0/0 rx/tx 1024设置此接口rx或是tx队列大小，intel人说2000-4000差距不大</span><br></pre></td></tr></table></figure><h1 id="trace"><a href="#trace" class="headerlink" title="trace"></a>trace</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">trace add dpdk-input 8跟踪dpdk接口数据包 （dpdk-input是节点的名字，想跟踪任何节点都可以）</span><br><span class="line">trace add vhost-user-input 8跟踪vhost接口数据包</span><br><span class="line">trace add af-packet-input 8跟踪veth接口数据包</span><br></pre></td></tr></table></figure><h1 id="show"><a href="#show" class="headerlink" title="show"></a>show</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">show hardware-interfaces查看接口mac</span><br><span class="line">show vlib graph查看node逻辑图</span><br><span class="line">show threads查看vpp线程</span><br><span class="line">show l2fib查看二层转发流表</span><br><span class="line">show ip fib查看路由表</span><br><span class="line">show ip arp查看arp</span><br><span class="line">show affinity查看主线程cpu亲和性</span><br><span class="line">show version查看vpp版本</span><br><span class="line">show int查看接口统计</span><br><span class="line">show interfacesaddress查看接口ip</span><br><span class="line">show bridge-domain查看bridge 接口情况</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;set&quot;&gt;&lt;a href=&quot;#set&quot; class=&quot;headerlink&quot; title=&quot;set&quot;&gt;&lt;/a&gt;set&lt;/h1&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;s
+      
+    
+    </summary>
+    
+      <category term="vpp" scheme="http://yoursite.com/categories/vpp/"/>
+    
+    
+      <category term="vpp" scheme="http://yoursite.com/tags/vpp/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://yoursite.com/2017/11/28/hello-world/"/>
+    <id>http://yoursite.com/2017/11/28/hello-world/</id>
+    <published>2017-11-29T02:39:51.855Z</published>
+    <updated>2017-11-29T02:39:51.855Z</updated>
+    
+    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
+      
+    
+    </summary>
+    
+      <category term="test" scheme="http://yoursite.com/categories/test/"/>
+    
+    
+      <category term="hello" scheme="http://yoursite.com/tags/hello/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>vpp load balance 实例配置</title>
+    <link href="http://yoursite.com/2017/11/28/vpp_lb/"/>
+    <id>http://yoursite.com/2017/11/28/vpp_lb/</id>
+    <published>2017-11-29T02:38:58.532Z</published>
+    <updated>2017-11-29T02:38:58.528Z</updated>
+    
+    <content type="html"><![CDATA[<p>VPP LoadBalancer 号称是对google maglev的复刻版，所以忍不住要试用一下。<br>在CentOS 7.2上面安装非常快速,因为vpp为centos提供了repo源和打包好的vpp程序。</p><h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">参见官网的安装程序： </span><br><span class="line"> https://docs.google.com/document/d/1zqYN7qMavgbdkPWIJIrsPXlxNOZ_GhEveHQxpYr3qrg/edit</span><br></pre></td></tr></table></figure><h1 id="LoadBalancer拓扑"><a href="#LoadBalancer拓扑" class="headerlink" title="LoadBalancer拓扑"></a>LoadBalancer拓扑</h1><p>VPP-Server: 192.168.2.2/24<br>VPP-VIP: 192.168.1.2<br>Real-Server-A: 192.168.2.3/24<br>Real-Server-B: 192.168.2.4/24</p><h1 id="配置vpp"><a href="#配置vpp" class="headerlink" title="配置vpp"></a>配置vpp</h1><p>$ dpdk_nic_bind -s<br>$ modprobe uio_pci_generic</p><h1 id="这里根据网卡的pci来设置"><a href="#这里根据网卡的pci来设置" class="headerlink" title="这里根据网卡的pci来设置"></a>这里根据网卡的pci来设置</h1><p>$ dpdk_nic_bind -b uio_pci_generic 0000:0b:00.0<br>$ sysctl -w vm.nr_hugepages=2048<br>$ vim /etc/vpp/startup.conf<br>dpdk {<br>    uio-driver uio_pci_generic<br>    dev 0000:0b:00.0<br>    socket-mem 1024<br>}</p><h1 id="启动vpp"><a href="#启动vpp" class="headerlink" title="启动vpp"></a>启动vpp</h1><p>$ service vpp start</p><h1 id="配置网卡地址"><a href="#配置网卡地址" class="headerlink" title="配置网卡地址"></a>配置网卡地址</h1><p>$ vppctl<br>$ show int<br>$ set int state GigabitEthernetb/0/0 up<br>$ set int ip address GigabitEthernetb/0/0 192.168.2.2/24<br>$ show int address<br>$ show hardware<br>$ show ip arp<br>$ show ip fib</p><h1 id="配置LoadBalancer"><a href="#配置LoadBalancer" class="headerlink" title="配置LoadBalancer"></a>配置LoadBalancer</h1><p>$ vppctl<br>$ lb conf ip4-src-address 192.168.2.2 timeout 3<br>$ lb vip 192.168.1.2/32 encap gre4 new_len 1024<br>$ lb as 192.168.1.2/32 192.168.2.3 192.168.2.4<br>$ show lb vip verbose</p><h1 id="配置其中一台Real-Server"><a href="#配置其中一台Real-Server" class="headerlink" title="配置其中一台Real Server"></a>配置其中一台Real Server</h1><p>$ ip tunnel add tun0 mode gre local 192.168.2.3 remote 192.168.2.2 ttl 255<br>$ ifconfig tun0 192.168.2.2/32 up<br>$ echo 1 &gt; /proc/sys/net/ipv4/conf/tun0/arp_ignore<br>$ echo 2 &gt; /proc/sys/net/ipv4/conf/tun0/arp_announce<br>$ echo 0 &gt; /proc/sys/net/ipv4/conf/tun0/rp_filter<br>$ echo 0 &gt; /proc/sys/net/ipv4/conf/all/rp_filter<br>$ echo 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore<br>$ echo 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</p><h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><p>小包的转发性能确实因为用了dpdk达到了不少的提升，基本上是线性转发。<br>默认用的RR轮询策略，还没有地方可以配置转发策略。<br>目前还没有health monitor，所以即使移除RealServer也依然会向那个地址转发。<br>要上生产，还需要解决以上问题。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;VPP LoadBalancer 号称是对google maglev的复刻版，所以忍不住要试用一下。&lt;br&gt;在CentOS 7.2上面安装非常快速,因为vpp为centos提供了repo源和打包好的vpp程序。&lt;/p&gt;
+&lt;h1 id=&quot;安装&quot;&gt;&lt;a href=&quot;#安装&quot; c
+      
+    
+    </summary>
+    
+      <category term="vpp" scheme="http://yoursite.com/categories/vpp/"/>
+    
+    
+      <category term="vpp" scheme="http://yoursite.com/tags/vpp/"/>
+    
+  </entry>
+  
+</feed>
