@@ -77,18 +77,18 @@
 
 
 
-<meta name="description" content="Makefile 中:= ?= += =的区别在Makefile中我们经常看到 = := ?= +=这几个赋值运算符，那么他们有什么区别呢？我们来做个简单的实验 新建一个Makefile，内容为： 12345678910111213141516171819ifdef DEFINE_VRE    VRE = “Hello World!”elseendififeq ($(OPT),define)">
+<meta name="description" content="Makefile 中:= ?= += =的区别在Makefile中我们经常看到 = := ?= +=这几个赋值运算符，那么他们有什么区别呢？我们来做个简单的实验 新建一个Makefile，内容为： 12345678910111213141516171819ifdef DEFINE_VRE    VRE = &amp;quot;Hello World!&amp;quot;elseendififeq ($(OPT),">
 <meta name="keywords" content="makefile">
 <meta property="og:type" content="article">
 <meta property="og:title" content="makefile中= := ?= +=">
 <meta property="og:url" content="http://blog.mycise.com/2018/01/19/makefile_赋值运算符/index.html">
 <meta property="og:site_name" content="独孤酒剑">
-<meta property="og:description" content="Makefile 中:= ?= += =的区别在Makefile中我们经常看到 = := ?= +=这几个赋值运算符，那么他们有什么区别呢？我们来做个简单的实验 新建一个Makefile，内容为： 12345678910111213141516171819ifdef DEFINE_VRE    VRE = “Hello World!”elseendififeq ($(OPT),define)">
+<meta property="og:description" content="Makefile 中:= ?= += =的区别在Makefile中我们经常看到 = := ?= +=这几个赋值运算符，那么他们有什么区别呢？我们来做个简单的实验 新建一个Makefile，内容为： 12345678910111213141516171819ifdef DEFINE_VRE    VRE = &amp;quot;Hello World!&amp;quot;elseendififeq ($(OPT),">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-19T08:22:26.864Z">
+<meta property="og:updated_time" content="2018-01-25T06:47:29.240Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="makefile中= := ?= +=">
-<meta name="twitter:description" content="Makefile 中:= ?= += =的区别在Makefile中我们经常看到 = := ?= +=这几个赋值运算符，那么他们有什么区别呢？我们来做个简单的实验 新建一个Makefile，内容为： 12345678910111213141516171819ifdef DEFINE_VRE    VRE = “Hello World!”elseendififeq ($(OPT),define)">
+<meta name="twitter:description" content="Makefile 中:= ?= += =的区别在Makefile中我们经常看到 = := ?= +=这几个赋值运算符，那么他们有什么区别呢？我们来做个简单的实验 新建一个Makefile，内容为： 12345678910111213141516171819ifdef DEFINE_VRE    VRE = &amp;quot;Hello World!&amp;quot;elseendififeq ($(OPT),">
 
 
 
@@ -396,7 +396,7 @@
       
         <p>Makefile 中:= ?= += =的区别<br>在Makefile中我们经常看到 = := ?= +=这几个赋值运算符，那么他们有什么区别呢？我们来做个简单的实验</p>
 <p>新建一个Makefile，内容为：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">ifdef DEFINE_VRE</span><br><span class="line">    VRE = “Hello World!”</span><br><span class="line">else</span><br><span class="line">endif</span><br><span class="line"></span><br><span class="line">ifeq ($(OPT),define)</span><br><span class="line">    VRE ?= “Hello World! First!”</span><br><span class="line">endif</span><br><span class="line"></span><br><span class="line">ifeq ($(OPT),add)</span><br><span class="line">    VRE += “Kelly!”</span><br><span class="line">endif</span><br><span class="line"></span><br><span class="line">ifeq ($(OPT),recover)</span><br><span class="line">    VRE := “Hello World! Again!”</span><br><span class="line">endif</span><br><span class="line"></span><br><span class="line">all:</span><br><span class="line">    @echo $(VRE)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">ifdef DEFINE_VRE</span><br><span class="line">    VRE = &quot;Hello World!&quot;</span><br><span class="line">else</span><br><span class="line">endif</span><br><span class="line"></span><br><span class="line">ifeq ($(OPT),define)</span><br><span class="line">    VRE ?= &quot;Hello World! First!&quot;</span><br><span class="line">endif</span><br><span class="line"></span><br><span class="line">ifeq ($(OPT),add)</span><br><span class="line">    VRE += &quot;Kelly!&quot;</span><br><span class="line">endif</span><br><span class="line"></span><br><span class="line">ifeq ($(OPT),recover)</span><br><span class="line">    VRE := &quot;Hello World! Again!&quot;</span><br><span class="line">endif</span><br><span class="line"></span><br><span class="line">all:</span><br><span class="line">    @echo $(VRE)</span><br></pre></td></tr></table></figure>
 <p>敲入以下make命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">make DEFINE_VRE=true OPT=define 输出：Hello World!</span><br><span class="line">make DEFINE_VRE=true OPT=add 输出：Hello World! Kelly!</span><br><span class="line">make DEFINE_VRE=true OPT=recover  输出：Hello World! Again!</span><br><span class="line">make DEFINE_VRE= OPT=define 输出：Hello World! First!</span><br><span class="line">make DEFINE_VRE= OPT=add 输出：Kelly!</span><br><span class="line">make DEFINE_VRE= OPT=recover 输出：Hello World! Again!</span><br></pre></td></tr></table></figure></p>
 <p>从上面的结果中我们可以清楚的看到他们的区别了<br>= 是最基本的赋值<br>:= 是覆盖之前的值<br>?= 是如果没有被赋值过就赋予等号后面的值<br>+= 是添加等号后面的值</p>
 
@@ -458,8 +458,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/18/dpvs源码分析（二）之协议栈处理流程/" rel="next" title="dpvs源码分析（二）之链路层">
-                <i class="fa fa-chevron-left"></i> dpvs源码分析（二）之链路层
+              <a href="/2018/01/15/dpvs源码分析（一）之启动过程/" rel="next" title="dpvs源码分析（一）之启动过程">
+                <i class="fa fa-chevron-left"></i> dpvs源码分析（一）之启动过程
               </a>
             
           </div>
@@ -467,6 +467,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/29/dpvs源码分析（三）之网络层/" rel="prev" title="dpvs源码分析（三）之网络层">
+                dpvs源码分析（三）之网络层 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -538,7 +542,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -560,7 +564,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
