@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[vim备忘录]]></title>
+    <url>%2F2018%2F03%2F15%2Fvim%E5%A4%87%E5%BF%98%E5%BD%95%2F</url>
+    <content type="text"><![CDATA[C语言VIM设置123456:set nu &quot;设置显示行号 :set bg=dark &quot;背景色设置 :set cindent &quot;设置c语言自动对齐 :set history=1000 &quot;设置历史记录条数 :set ts=4 &quot;设置tab对应空格数:set expandtab &quot;vim 里面按下tab 会自动替换为4个空格 tab和空格替换123456789TAB替换为空格：:set ts=4:set expandtab:%retab!空格替换为TAB：:set ts=4:set noexpandtab:%retab!]]></content>
+      <categories>
+        <category>备忘录</category>
+      </categories>
+      <tags>
+        <tag>vim</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[container_of]]></title>
+    <url>%2F2018%2F03%2F08%2Fcontainer_of%2F</url>
+    <content type="text"><![CDATA[linux 内核链表的实现有段代码比较有意思，这里记录一下。 背景当在阅读遍历链表这个宏定义时，可能会对container_of有些许疑惑。12345678910111213141516171819202122232425262728293031323334353637/** * list_for_each_entry - iterate over list of given type * @pos: the type * to use as a loop cursor. * @head: the head for your list. * @member: the name of the list_head within the struct. */ #define list_for_each_entry(pos, head, member) \ for (pos = list_first_entry(head, typeof(*pos), member); \ &amp;pos-&gt;member != (head); \ pos = list_next_entry(pos, member)) /** * list_entry - get the struct for this entry * @ptr: the &amp;struct list_head pointer. * @type: the type of the struct this is embedded in. * @member: the name of the list_head within the struct. */#define list_entry(ptr, type, member) \ container_of(ptr, type, member)/** * list_first_entry - get the first element from a list * @ptr: the list head to take the element from. * @type: the type of the struct this is embedded in. * @member: the name of the list_head within the struct. * * Note, that list is expected to be not empty. */#define list_first_entry(ptr, type, member) \ list_entry((ptr)-&gt;next, type, member)#ifndef container_of#define container_of(ptr, type, member) \ (type *)((char *)(ptr) - (char *) &amp;((type *)0)-&gt;member)#endif 解析123#define container_of(ptr, type, member) \ (type *)((char *)(ptr) - (char *) &amp;((type *)0)-&gt;member)#endif 如上定义，为了更直观，定义如下数据结构：12345678910111213struct list_head &#123; struct list_head *next; struct list_head *prev; &#125;;struct type&#123; int a; int b; struct list_head list; int c;&#125;;那么对于container_of宏定义，三个参数分别对应： ptr: list的内存地址 type: list所在数据结构的类型 member： 是指list_head定义变量的名字，那么在这里就叫list 这个宏定义的功能：通过member的地址和member的名字获取member所在数据结构的首地址。首先： (char ) &amp;((type )0)-&gt;member获取member在type类型中的偏移量然后： 用ptr减去member在type类型数据结构中的偏移量，那么就得到了member所在type变量的首地址。 最后举例：123456789101112131415161718192021222324252627#include&lt;stdio.h&gt;struct A&#123; int a; int b; int c;&#125;;int main(void)&#123; struct A x; struct A *y; x.a = 1024; printf("output1: %0x\n", &amp;(((struct A*)0)-&gt;b)); y = (struct A*) (((char*)(&amp;x.b)) - ((char*)&amp;(((struct A*)0)-&gt;b))); printf("output2: %d\n", y-&gt;a); printf("output3:%0x\n", &amp;x); printf("output4:%0x\n", y); return 0;&#125;运行结果为：output1: 4output2: 1024output3:5b22a1e0output4:5b22a1e0]]></content>
+      <categories>
+        <category>备忘录</category>
+      </categories>
+      <tags>
+        <tag>container_of</tag>
+        <tag>linux</tag>
+        <tag>链表</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[vim自动格式化代码]]></title>
     <url>%2F2018%2F02%2F06%2Fvim%E8%87%AA%E5%8A%A8%E6%A0%BC%E5%BC%8F%E5%8C%96%E4%BB%A3%E7%A0%81%2F</url>
     <content type="text"><![CDATA[astyleastyle是款代码格式化工具，具体使用参考官网：http://astyle.sourceforge.net/ astyle和vim整合在和vim整合之前，首先应保证astyle成功安装，并可用。vim具有掉外部命令的能力，因此可以在.vimrc中添加如下代码，编辑完成后，按F2即可对代码进行格式。12345678910111213141516171819202122map &lt;F2&gt; :call FormatCode()&lt;CR&gt;func! FormatCode() exec &quot;w&quot; if &amp;filetype == &apos;c&apos; || &amp;filetype == &apos;h&apos; exec &quot;!astyle --style=linux --suffix=none %&quot; elseif &amp;filetype == &apos;cpp&apos; || &amp;filetype == &apos;cc&apos; || &amp;filetype == &apos;hpp&apos; exec &quot;!astyle --style=linux --suffix=none %&quot; elseif &amp;filetype == &apos;perl&apos; exec &quot;!astyle --style=gnu --suffix=none %&quot; elseif &amp;filetype == &apos;py&apos;|| &amp;filetype == &apos;python&apos; exec &quot;!autopep8 --in-place --aggressive %&quot; elseif &amp;filetype == &apos;java&apos; exec &quot;!astyle --style=java --suffix=none %&quot; elseif &amp;filetype == &apos;jsp&apos; exec &quot;!astyle --style=gnu --suffix=none %&quot; elseif &amp;filetype == &apos;xml&apos; exec &quot;!astyle --style=gnu --suffix=none %&quot; else exec &quot;normal gg=G&quot; return endifendfunc]]></content>
@@ -40,14 +64,14 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[makefile中= := ?= +=]]></title>
-    <url>%2F2018%2F01%2F19%2Fmakefile_%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6%2F</url>
+    <title><![CDATA[makefile备忘录]]></title>
+    <url>%2F2018%2F01%2F19%2Fmakefile%E5%A4%87%E5%BF%98%E5%BD%95%2F</url>
     <content type="text"><![CDATA[Makefile 中:= ?= += =的区别在Makefile中我们经常看到 = := ?= +=这几个赋值运算符，那么他们有什么区别呢？我们来做个简单的实验 新建一个Makefile，内容为： 12345678910111213141516171819ifdef DEFINE_VRE VRE = &quot;Hello World!&quot;elseendififeq ($(OPT),define) VRE ?= &quot;Hello World! First!&quot;endififeq ($(OPT),add) VRE += &quot;Kelly!&quot;endififeq ($(OPT),recover) VRE := &quot;Hello World! Again!&quot;endifall: @echo $(VRE) 敲入以下make命令：123456make DEFINE_VRE=true OPT=define 输出：Hello World!make DEFINE_VRE=true OPT=add 输出：Hello World! Kelly!make DEFINE_VRE=true OPT=recover 输出：Hello World! Again!make DEFINE_VRE= OPT=define 输出：Hello World! First!make DEFINE_VRE= OPT=add 输出：Kelly!make DEFINE_VRE= OPT=recover 输出：Hello World! Again! 从上面的结果中我们可以清楚的看到他们的区别了= 是最基本的赋值:= 是覆盖之前的值?= 是如果没有被赋值过就赋予等号后面的值+= 是添加等号后面的值]]></content>
       <categories>
         <category>备忘录</category>
       </categories>
       <tags>
-        <tag>makefile</tag>
+        <tag>makefil</tag>
       </tags>
   </entry>
   <entry>
