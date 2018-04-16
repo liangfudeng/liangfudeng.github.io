@@ -4,8 +4,100 @@
 
     
   <url>
+    <loc>http://blog.mycise.com/2018/01/11/%E4%BB%A4%E7%89%8C%E6%A1%B6%E7%AE%97%E6%B3%95%E7%AE%97%E6%B3%95/</loc>
+    <lastmod>2018-04-16T09:53:21.422Z</lastmod>
+    <data>
+        <display>
+        <title>基于DPDK的多核令牌桶算法</title>
+        <pubTime>2018-01-11T08:35:16.823Z</pubTime>
+        
+        <tag>网络转发</tag>
+         
+        <tag>DPDK</tag>
+         
+        <tag>令牌桶算法</tag>
+         
+        <tag>多核限速</tag>
+         
+         
+           
+             
+              <breadCrumb title="原创精选" url="http://blog.mycise.com/categories/%E5%8E%9F%E5%88%9B%E7%B2%BE%E9%80%89/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://blog.mycise.com/2018/01/19/makefile%E5%A4%87%E5%BF%98%E5%BD%95/</loc>
+    <lastmod>2018-04-16T09:52:10.901Z</lastmod>
+    <data>
+        <display>
+        <title>makefile备忘录</title>
+        <pubTime>2018-01-19T08:21:43.729Z</pubTime>
+        
+        <tag>makefile</tag>
+         
+         
+           
+             
+              <breadCrumb title="备忘录" url="http://blog.mycise.com/categories/%E5%A4%87%E5%BF%98%E5%BD%95/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://blog.mycise.com/2018/03/29/virsh_cpu%EF%BC%88%E8%BD%AC%EF%BC%89/</loc>
+    <lastmod>2018-03-29T09:36:18.358Z</lastmod>
+    <data>
+        <display>
+        <title>virsh cpu配置(转)</title>
+        <pubTime>2018-03-29T09:06:29.218Z</pubTime>
+        
+        <tag>kvm</tag>
+         
+        <tag>虚拟化</tag>
+         
+         
+           
+             
+              <breadCrumb title="备忘录" url="http://blog.mycise.com/categories/%E5%A4%87%E5%BF%98%E5%BD%95/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://blog.mycise.com/2018/03/29/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C%EF%BC%88%E8%BD%AC%EF%BC%89/</loc>
+    <lastmod>2018-03-29T09:32:45.214Z</lastmod>
+    <data>
+        <display>
+        <title>内存屏障(转)</title>
+        <pubTime>2018-03-29T09:15:16.052Z</pubTime>
+        
+        <tag>内存屏障</tag>
+         
+        <tag>Memory</tag>
+         
+        <tag>Barrier</tag>
+         
+         
+           
+             
+              <breadCrumb title="网络转发" url="http://blog.mycise.com/categories/%E7%BD%91%E7%BB%9C%E8%BD%AC%E5%8F%91/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://blog.mycise.com/2018/03/15/vim%E5%A4%87%E5%BF%98%E5%BD%95/</loc>
-    <lastmod>2018-03-15T06:41:48.265Z</lastmod>
+    <lastmod>2018-03-20T03:05:18.842Z</lastmod>
     <data>
         <display>
         <title>vim备忘录</title>
@@ -60,52 +152,6 @@
         <tag>DPVS</tag>
          
         <tag>DPDK</tag>
-         
-         
-           
-             
-              <breadCrumb title="网络转发" url="http://blog.mycise.com/categories/%E7%BD%91%E7%BB%9C%E8%BD%AC%E5%8F%91/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://blog.mycise.com/2018/01/19/makefile%E5%A4%87%E5%BF%98%E5%BD%95/</loc>
-    <lastmod>2018-02-13T03:18:28.401Z</lastmod>
-    <data>
-        <display>
-        <title>makefile备忘录</title>
-        <pubTime>2018-01-19T08:21:43.729Z</pubTime>
-        
-        <tag>makefil</tag>
-         
-         
-           
-             
-              <breadCrumb title="备忘录" url="http://blog.mycise.com/categories/%E5%A4%87%E5%BF%98%E5%BD%95/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://blog.mycise.com/2018/01/11/%E4%BB%A4%E7%89%8C%E6%A1%B6%E7%AE%97%E6%B3%95%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2018-02-11T09:53:18.795Z</lastmod>
-    <data>
-        <display>
-        <title>基于DPDK的多核令牌桶算法</title>
-        <pubTime>2018-01-11T08:35:16.823Z</pubTime>
-        
-        <tag>网络转发</tag>
-         
-        <tag>DPDK</tag>
-         
-        <tag>令牌桶算法</tag>
-         
-        <tag>多核限速</tag>
          
          
            
